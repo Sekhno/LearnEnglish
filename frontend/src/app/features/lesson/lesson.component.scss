@@ -1,0 +1,257 @@
+.lesson-layout {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-page);
+}
+
+/* ===== HEADER ===== */
+.lesson-header {
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border);
+  padding: 16px 32px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.back-btn { flex-shrink: 0; }
+
+.lesson-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 200px;
+
+  h1 { font-size: 18px; font-weight: 700; }
+}
+
+.lesson-tabs {
+  display: flex;
+  gap: 4px;
+  background: var(--bg-page);
+  padding: 4px;
+  border-radius: var(--radius-sm);
+}
+
+.tab-btn {
+  padding: 7px 18px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  transition: var(--transition);
+
+  &:hover { color: var(--text-primary); background: var(--bg-card); }
+
+  &.active {
+    background: var(--bg-card);
+    color: var(--primary);
+    font-weight: 600;
+    box-shadow: var(--shadow-sm);
+  }
+}
+
+/* ===== BODY ===== */
+.lesson-body {
+  flex: 1;
+  padding: 32px;
+  max-width: 760px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* ===== LOADING/ERROR ===== */
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  gap: 16px;
+  color: var(--text-secondary);
+
+  .spinner-lg {
+    width: 44px;
+    height: 44px;
+    border: 4px solid var(--border);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spin .8s linear infinite;
+  }
+}
+
+.error-card, .empty-card {
+  padding: 32px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ===== THEORY ===== */
+.theory-section { display: flex; flex-direction: column; gap: 16px; margin-bottom: 24px; }
+
+.theory-card {
+  padding: 24px;
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--text-primary);
+
+  /* Markdown-like styles */
+  :deep(strong) { font-weight: 700; }
+  :deep(em)     { font-style: italic; color: var(--primary-dark); }
+  :deep(table)  { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 14px; }
+  :deep(th), :deep(td) { border: 1px solid var(--border); padding: 8px 12px; text-align: left; }
+  :deep(th)     { background: var(--bg-page); font-weight: 600; }
+}
+
+.examples-section { padding: 24px; margin-bottom: 24px; }
+.section-title { font-size: 16px; font-weight: 700; margin-bottom: 16px; }
+
+.examples-list { display: flex; flex-direction: column; gap: 12px; }
+
+.example-row {
+  padding: 14px;
+  background: var(--bg-page);
+  border-radius: var(--radius-sm);
+  border-left: 3px solid var(--primary);
+
+  .example-en { font-weight: 600; font-size: 15px; color: var(--text-primary); }
+  .example-ru { font-size: 14px; color: var(--text-secondary); margin-top: 4px; }
+}
+
+.theory-actions { display: flex; justify-content: flex-end; padding-top: 8px; }
+
+/* ===== EXERCISE PROGRESS ===== */
+.exercise-progress {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+
+  .ex-counter, .ex-score { font-size: 13px; font-weight: 600; color: var(--text-secondary); white-space: nowrap; }
+}
+
+/* ===== EXERCISE CARD ===== */
+.exercise-card { padding: 28px; }
+
+.ex-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 20px;
+
+  .difficulty-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    border: 1.5px solid var(--border);
+    &.filled { background: var(--warning); border-color: var(--warning); }
+  }
+}
+
+.ex-question {
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.5;
+  margin-bottom: 24px;
+  color: var(--text-primary);
+}
+
+.options-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; }
+
+.option-btn {
+  width: 100%;
+  padding: 14px 18px;
+  border: 2px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 15px;
+  font-weight: 500;
+  text-align: left;
+  color: var(--text-primary);
+  background: var(--bg-card);
+  transition: var(--transition);
+
+  &:hover:not(:disabled) { border-color: var(--primary); background: var(--primary-light); color: var(--primary); }
+
+  &.selected { border-color: var(--primary); background: var(--primary-light); color: var(--primary); }
+  &.correct  { border-color: var(--success); background: var(--success-light); color: #166534; font-weight: 700; }
+  &.wrong    { border-color: var(--danger); background: var(--danger-light); color: #991B1B; }
+}
+
+/* ===== FEEDBACK ===== */
+.feedback {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  border-radius: var(--radius-sm);
+  margin-bottom: 20px;
+  font-size: 14px;
+
+  &.correct { background: var(--success-light); color: #166534; }
+  &.wrong   { background: var(--danger-light); color: #991B1B; }
+
+  .feedback-icon { font-size: 18px; font-weight: 700; flex-shrink: 0; }
+  .feedback-explain { margin-top: 6px; opacity: .85; }
+  .xp-gain { margin-left: auto; font-weight: 700; white-space: nowrap; }
+}
+
+.ex-actions { display: flex; justify-content: flex-end; }
+
+.mini-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255,255,255,.4);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin .6s linear infinite;
+}
+
+/* ===== RESULTS ===== */
+.results-card {
+  padding: 48px 32px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+
+  .results-icon { font-size: 56px; }
+  h2 { font-size: 24px; font-weight: 700; }
+  .results-score { font-size: 56px; font-weight: 800; color: var(--primary); line-height: 1; }
+
+  .results-actions { display: flex; gap: 12px; margin-top: 12px; flex-wrap: wrap; justify-content: center; }
+}
+
+/* ===== VOCABULARY ===== */
+.vocab-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 14px;
+}
+
+.vocab-card {
+  padding: 20px;
+
+  .vocab-word        { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+  .vocab-ipa         { font-size: 13px; color: var(--text-secondary); margin-bottom: 8px; font-style: italic; }
+  .vocab-translation { font-size: 15px; font-weight: 500; color: var(--primary); }
+  .vocab-examples    { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); }
+  .vocab-ex          { font-size: 13px; color: var(--text-secondary); line-height: 1.4; }
+}
+
+@media (max-width: 768px) {
+  .lesson-header { padding: 12px 16px; }
+  .lesson-body   { padding: 20px 16px; }
+  .ex-question   { font-size: 16px; }
+}

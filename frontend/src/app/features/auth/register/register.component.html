@@ -1,0 +1,51 @@
+<div class="auth-page">
+  <div class="auth-card card">
+    <div class="auth-logo">
+      <div class="logo-icon">EN</div>
+      <h1>LearnEnglish</h1>
+    </div>
+    <h2>Create account</h2>
+    <p class="subtitle">Start your English journey today — it's free!</p>
+
+    @if (error()) {
+      <div class="alert-error">{{ error() }}</div>
+    }
+
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <div class="form-field">
+        <label for="name">Full name</label>
+        <input id="name" type="text" formControlName="name" placeholder="Anna Smith"
+               [class.error]="form.get('name')?.invalid && form.get('name')?.touched">
+        @if (form.get('name')?.errors?.['minlength'] && form.get('name')?.touched) {
+          <span class="error-msg">Name must be at least 2 characters</span>
+        }
+      </div>
+
+      <div class="form-field">
+        <label for="email">Email</label>
+        <input id="email" type="email" formControlName="email" placeholder="you@example.com"
+               [class.error]="form.get('email')?.invalid && form.get('email')?.touched">
+        @if (form.get('email')?.errors?.['email'] && form.get('email')?.touched) {
+          <span class="error-msg">Enter a valid email</span>
+        }
+      </div>
+
+      <div class="form-field">
+        <label for="password">Password</label>
+        <input id="password" type="password" formControlName="password" placeholder="Min. 6 characters"
+               [class.error]="form.get('password')?.invalid && form.get('password')?.touched">
+        @if (form.get('password')?.errors?.['minlength'] && form.get('password')?.touched) {
+          <span class="error-msg">Password must be at least 6 characters</span>
+        }
+      </div>
+
+      <button type="submit" class="btn btn-primary submit-btn" [disabled]="form.invalid || loading()">
+        @if (loading()) { <span class="spinner"></span> } Create Account
+      </button>
+    </form>
+
+    <p class="auth-footer">
+      Already have an account? <a routerLink="/login">Sign in</a>
+    </p>
+  </div>
+</div>

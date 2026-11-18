@@ -1,0 +1,202 @@
+<div class="layout">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon">EN</div>
+      <span>LearnEnglish</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a class="nav-item active" routerLink="/dashboard">
+        <span class="nav-icon">📊</span> Dashboard
+      </a>
+      <a class="nav-item" routerLink="/dashboard">
+        <span class="nav-icon">📖</span> Lessons
+      </a>
+      <a class="nav-item" routerLink="/dashboard">
+        <span class="nav-icon">📝</span> Vocabulary
+      </a>
+      <a class="nav-item" routerLink="/dashboard">
+        <span class="nav-icon">🔁</span> Reviews
+      </a>
+      <a class="nav-item" routerLink="/dashboard">
+        <span class="nav-icon">🤖</span> AI Practice
+      </a>
+    </nav>
+
+    <button class="logout-btn" (click)="auth.logout()">
+      <span>⬅</span> Log out
+    </button>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    @if (loading()) {
+      <div class="loading-state">
+        <div class="spinner-lg"></div>
+        <p>Loading your dashboard...</p>
+      </div>
+    }
+
+    @if (error()) {
+      <div class="error-state card">
+        <p>{{ error() }}</p>
+        <button class="btn btn-primary" (click)="ngOnInit()">Retry</button>
+      </div>
+    }
+
+    @if (!loading() && !error() && dashboard(); as d) {
+      <!-- HEADER -->
+      <header class="page-header">
+        <div>
+          <h1>Good day, {{ d.userStats.name }}!</h1>
+          <p class="text-muted">Keep up the great work on your English journey.</p>
+        </div>
+        <div class="header-actions">
+          <div class="streak-badge">
+            🔥 {{ d.userStats.streakDays }} day streak
+          </div>
+          <span class="badge badge-{{d.userStats.currentLevel.toLowerCase()}}">
+            {{ d.userStats.currentLevel }}
+          </span>
+        </div>
+      </header>
+
+      <!-- STAT CARDS -->
+      <section class="stats-grid">
+        <div class="stat-card card">
+          <div class="stat-icon" style="background:#EEF0FF;color:#6C63FF">📚</div>
+          <div>
+            <div class="stat-value">{{ TOTAL_TOPICS }}</div>
+            <div class="stat-label">Total Topics</div>
+          </div>
+        </div>
+        <div class="stat-card card">
+          <div class="stat-icon" style="background:#D1FAE5;color:#059669">✅</div>
+          <div>
+            <div class="stat-value">{{ d.userStats.completedLessons }}</div>
+            <div class="stat-label">Completed</div>
+          </div>
+        </div>
+        <div class="stat-card card">
+          <div class="stat-icon" style="background:#FEF3C7;color:#D97706">⚡</div>
+          <div>
+            <div class="stat-value">{{ d.userStats.totalXp }}</div>
+            <div class="stat-label">Total XP</div>
+          </div>
+        </div>
+        <div class="stat-card card">
+          <div class="stat-icon" style="background:#FCE7F3;color:#DB2777">🔁</div>
+          <div>
+            <div class="stat-value">{{ d.reviewsDue }}</div>
+            <div class="stat-label">Reviews Due</div>
+          </div>
+        </div>
+      </section>
+
+      <div class="content-grid">
+        <!-- LEFT COLUMN -->
+        <div class="col-left">
+
+          <!-- SKILLS -->
+          <section class="card section-card">
+            <h2 class="section-title">Skills Progress</h2>
+            <div class="skills-grid">
+              @for (skill of d.skillProgress; track skill.skill) {
+                <div class="skill-item">
+                  <div class="skill-header">
+                    <span class="skill-name">{{ skill.skill }}</span>
+                    <span class="skill-score">{{ skill.score }}%</span>
+                  </div>
+                  <div class="progress-bar">
+                    <div class="fill" [style.width.%]="skill.score || 0"></div>
+                  </div>
+                </div>
+              }
+            </div>
+          </section>
+
+          <!-- XP PROGRESS -->
+          <section class="card section-card xp-card">
+            <div class="xp-header">
+              <div>
+                <h2 class="section-title">XP Progress</h2>
+                <p class="text-muted">{{ xpToNextLevel(d.userStats.totalXp) }} XP to next level</p>
+              </div>
+              <div class="xp-total">{{ d.userStats.totalXp }} XP</div>
+            </div>
+            <div class="progress-bar" style="height:12px">
+              <div class="fill" [style.width.%]="xpProgress(d.userStats.totalXp)"></div>
+            </div>
+          </section>
+
+          <!-- LEVEL OVERVIEW -->
+          <section class="card section-card">
+            <h2 class="section-title">Curriculum Progress</h2>
+            <div class="levels-list">
+              @for (lp of d.levelProgress; track lp.code) {
+                <div class="level-row" [class.active]="lp.code === d.userStats.currentLevel">
+                  <div class="level-info">
+                    <span class="badge badge-{{lp.code.toLowerCase()}}">{{ lp.code }}</span>
+                    <div>
+                      <div class="level-name">{{ lp.name }}</div>
+                      <div class="level-meta">{{ lp.completedLessons }}/{{ lp.totalLessons }} lessons</div>
+                    </div>
+                  </div>
+                  <div class="level-progress-wrap">
+                    <div class="progress-bar">
+                      <div class="fill" [style.width.%]="lp.progressPercent"
+                           [style.background]="'linear-gradient(90deg, ' + levelColor(lp.code) + ', ' + levelColor(lp.code) + '99)'"></div>
+                    </div>
+                    <span class="level-pct">{{ lp.progressPercent }}%</span>
+                  </div>
+                </div>
+              }
+            </div>
+          </section>
+        </div>
+
+        <!-- RIGHT COLUMN: A1 TOPICS -->
+        <div class="col-right">
+          <section class="card section-card topics-section">
+            <div class="topics-header">
+              <h2 class="section-title">A1 Topics</h2>
+              <span class="badge badge-a1">20 lessons</span>
+            </div>
+
+            @if (d.currentLevelTopics.length === 0) {
+              <div class="empty-topics">
+                <p>No topics available yet.</p>
+              </div>
+            }
+
+            <div class="topics-grid">
+              @for (topic of d.currentLevelTopics; track topic.lessonId) {
+                <button
+                  class="topic-card"
+                  [class.completed]="topic.completed"
+                  [class.locked]="topic.locked"
+                  [class.available]="!topic.locked && !topic.completed"
+                  (click)="startLesson(topic)"
+                  [title]="topic.name"
+                >
+                  <div class="topic-num">{{ topicIcon(topic) }}</div>
+                  <div class="topic-name">{{ topic.name }}</div>
+                  @if (topic.score !== null) {
+                    <div class="topic-score">{{ topic.score }}%</div>
+                  }
+                </button>
+              }
+            </div>
+
+            <div class="topics-legend">
+              <span class="legend-item"><span class="dot done"></span>Completed</span>
+              <span class="legend-item"><span class="dot available"></span>Available</span>
+              <span class="legend-item"><span class="dot locked"></span>Locked</span>
+            </div>
+          </section>
+        </div>
+      </div>
+    }
+  </main>
+</div>
