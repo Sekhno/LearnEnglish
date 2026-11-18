@@ -3,6 +3,7 @@
 /Users/Shared/Pet Projects/Spain/LearnEnglish/backend/src/main/java/com/learnenglish/service/AuthService.java
 /Users/Shared/Pet Projects/Spain/LearnEnglish/backend/src/main/java/com/learnenglish/model/UserProgress.java
 /Users/Shared/Pet Projects/Spain/LearnEnglish/backend/src/main/java/com/learnenglish/service/DashboardService.java
+/Users/Shared/Pet Projects/Spain/LearnEnglish/backend/src/main/java/com/learnenglish/dto/lesson/CompleteLessonRequest.java
 /Users/Shared/Pet Projects/Spain/LearnEnglish/backend/src/main/java/com/learnenglish/controller/ExerciseController.java
 /Users/Shared/Pet Projects/Spain/LearnEnglish/backend/src/main/java/com/learnenglish/dto/auth/LoginRequest.java
 /Users/Shared/Pet Projects/Spain/LearnEnglish/backend/src/main/java/com/learnenglish/model/Level.java
