@@ -1,0 +1,196 @@
+<div class="lesson-layout">
+  <!-- TOP BAR -->
+  <header class="lesson-header">
+    <a routerLink="/dashboard" class="btn btn-outline back-btn">← Back</a>
+    @if (lesson(); as l) {
+      <div class="lesson-title-wrap">
+        <span class="badge badge-{{l.levelCode.toLowerCase()}}">{{ l.levelCode }}</span>
+        <h1>{{ l.name }}</h1>
+      </div>
+    }
+    <div class="lesson-tabs">
+      <button class="tab-btn" [class.active]="activeTab() === 'theory'"
+              (click)="setTab('theory')">Theory</button>
+      <button class="tab-btn" [class.active]="activeTab() === 'practice'"
+              (click)="setTab('practice')">Practice</button>
+      <button class="tab-btn" [class.active]="activeTab() === 'vocabulary'"
+              (click)="setTab('vocabulary')">Vocabulary</button>
+    </div>
+  </header>
+
+  <div class="lesson-body">
+    @if (loading()) {
+      <div class="loading-state">
+        <div class="spinner-lg"></div><p>Loading lesson...</p>
+      </div>
+    }
+
+    @if (error()) {
+      <div class="error-card card">
+        <p>{{ error() }}</p>
+        <a routerLink="/dashboard" class="btn btn-primary">Back to Dashboard</a>
+      </div>
+    }
+
+    @if (!loading() && !error() && lesson(); as l) {
+
+      <!-- THEORY TAB -->
+      @if (activeTab() === 'theory') {
+        <div class="tab-content fade-in">
+
+          @if (l.theory.length > 0) {
+            <section class="theory-section">
+              @for (block of l.theory; track block.id) {
+                <div class="card theory-card" [innerHTML]="block.content"></div>
+              }
+            </section>
+          }
+
+          @if (l.examples.length > 0) {
+            <section class="examples-section card">
+              <h2 class="section-title">Examples</h2>
+              <div class="examples-list">
+                @for (ex of l.examples; track ex.id) {
+                  <div class="example-row">
+                    <div class="example-en">{{ ex.englishText }}</div>
+                    <div class="example-ru">{{ ex.translation }}</div>
+                  </div>
+                }
+              </div>
+            </section>
+          }
+
+          <div class="theory-actions">
+            <button class="btn btn-primary" (click)="setTab('practice')">
+              Start Practice →
+            </button>
+          </div>
+        </div>
+      }
+
+      <!-- PRACTICE TAB -->
+      @if (activeTab() === 'practice') {
+        <div class="tab-content fade-in">
+
+          @if (l.exercises.length === 0) {
+            <div class="empty-card card">No exercises available yet.</div>
+          }
+
+          @if (l.exercises.length > 0) {
+
+            <!-- Progress bar -->
+            <div class="exercise-progress">
+              <span class="ex-counter">{{ answered() }}/{{ l.exercises.length }}</span>
+              <div class="progress-bar" style="flex:1">
+                <div class="fill" [style.width.%]="progressPercent"></div>
+              </div>
+              <span class="ex-score">Score: {{ score() }}</span>
+            </div>
+
+            @if (answered() < l.exercises.length) {
+              @if (currentExercise(); as ex) {
+                <div class="exercise-card card fade-in">
+                  <div class="ex-meta">
+                    <span class="badge badge-a1">Exercise {{ currentExerciseIdx() + 1 }}</span>
+                    @for (d of [1,2,3]; track d) {
+                      <span class="difficulty-dot" [class.filled]="d <= ex.difficulty"></span>
+                    }
+                  </div>
+
+                  <p class="ex-question">{{ ex.question }}</p>
+
+                  @if (ex.options) {
+                    <div class="options-list">
+                      @for (opt of ex.options; track opt) {
+                        <button
+                          class="option-btn"
+                          [class.selected]="selectedAnswer() === opt"
+                          [class.correct]="submitResult() !== null && opt === submitResult()!.correctAnswer"
+                          [class.wrong]="submitResult() !== null && selectedAnswer() === opt && !submitResult()!.correct"
+                          (click)="selectOption(opt)"
+                        >
+                          {{ opt }}
+                        </button>
+                      }
+                    </div>
+                  }
+
+                  @if (submitResult(); as result) {
+                    <div class="feedback" [class.correct]="result.correct" [class.wrong]="!result.correct">
+                      <span class="feedback-icon">{{ result.correct ? '✓' : '✗' }}</span>
+                      <div>
+                        <strong>{{ result.correct ? 'Correct!' : 'Not quite.' }}</strong>
+                        @if (!result.correct) {
+                          <span> Correct answer: <em>{{ result.correctAnswer }}</em></span>
+                        }
+                        @if (result.explanation?.['ru']) {
+                          <p class="feedback-explain">{{ result.explanation!['ru'] }}</p>
+                        }
+                      </div>
+                      @if (result.correct) {
+                        <span class="xp-gain">+{{ result.xpEarned }} XP</span>
+                      }
+                    </div>
+                  }
+
+                  <div class="ex-actions">
+                    @if (!submitResult()) {
+                      <button class="btn btn-primary"
+                              [disabled]="!selectedAnswer() || submitting()"
+                              (click)="submitAnswer()">
+                        @if (submitting()) { <span class="mini-spinner"></span> } Check Answer
+                      </button>
+                    } @else {
+                      <button class="btn btn-primary" (click)="nextExercise()">
+                        {{ isLastExercise() ? 'Finish' : 'Next Exercise →' }}
+                      </button>
+                    }
+                  </div>
+                </div>
+              }
+            } @else {
+              <!-- RESULTS SCREEN -->
+              <div class="results-card card fade-in">
+                <div class="results-icon">{{ finalScore >= 70 ? '🎉' : '📚' }}</div>
+                <h2>Lesson Complete!</h2>
+                <div class="results-score">{{ finalScore }}%</div>
+                <p class="text-muted">You answered {{ score() }} out of {{ answered() }} correctly.</p>
+                <div class="results-actions">
+                  <a routerLink="/dashboard" class="btn btn-outline">Back to Dashboard</a>
+                  <button class="btn btn-primary" (click)="setTab('vocabulary')">
+                    Study Vocabulary
+                  </button>
+                </div>
+              </div>
+            }
+          }
+        </div>
+      }
+
+      <!-- VOCABULARY TAB -->
+      @if (activeTab() === 'vocabulary') {
+        <div class="tab-content fade-in">
+          @if (l.vocabulary.length === 0) {
+            <div class="empty-card card">No vocabulary for this lesson yet.</div>
+          }
+          <div class="vocab-grid">
+            @for (v of l.vocabulary; track v.id) {
+              <div class="vocab-card card">
+                <div class="vocab-word">{{ v.word }}</div>
+                @if (v.ipa) { <div class="vocab-ipa">{{ v.ipa }}</div> }
+                <div class="vocab-translation">{{ v.translation }}</div>
+                @if (v.examples && v.examples.length > 0) {
+                  <div class="vocab-examples">
+                    @for (ex of v.examples.slice(0, 1); track ex) {
+                      <p class="vocab-ex">{{ ex }}</p>
+                    }
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        </div>
+      }
+    }
+  </div>
+</div>
