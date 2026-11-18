@@ -15,4 +15,8 @@ export class LessonService {
   submitExercise(req: ExerciseSubmitRequest): Observable<ExerciseSubmitResponse> {
     return this.http.post<ExerciseSubmitResponse>(`${environment.apiUrl}/exercises/submit`, req);
   }
+
+  completeLesson(slug: string, score: number): Observable<void> {
+    return this.http.post<void>(`${environment.apiUrl}/lessons/${slug}/complete`, { score });
+  }
 }

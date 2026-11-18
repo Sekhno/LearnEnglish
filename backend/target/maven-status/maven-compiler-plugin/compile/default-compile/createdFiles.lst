@@ -61,3 +61,4 @@ com/learnenglish/config/SecurityConfig.class
 com/learnenglish/controller/ExerciseController.class
 com/learnenglish/dto/auth/RegisterRequest.class
 com/learnenglish/repository/ReviewItemRepository.class
+com/learnenglish/dto/lesson/CompleteLessonRequest.class

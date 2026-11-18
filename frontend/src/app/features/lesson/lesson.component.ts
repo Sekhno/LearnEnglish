@@ -73,6 +73,14 @@ export class LessonComponent implements OnInit {
         this.answered.update(n => n + 1);
         if (result.correct) this.score.update(n => n + 1);
         this.submitting.set(false);
+
+        if (this.isLastExercise()) {
+          const lesson = this.lesson();
+          if (lesson) {
+            const scorePercent = Math.round((this.score() / this.answered()) * 100);
+            this.lessonService.completeLesson(lesson.slug, scorePercent).subscribe();
+          }
+        }
       },
       error: () => this.submitting.set(false)
     });

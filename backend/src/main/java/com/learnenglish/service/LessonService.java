@@ -2,9 +2,14 @@ package com.learnenglish.service;
 
 import com.learnenglish.dto.lesson.LessonResponse;
 import com.learnenglish.model.Lesson;
+import com.learnenglish.model.UserProgress;
 import com.learnenglish.repository.LessonRepository;
+import com.learnenglish.repository.UserProgressRepository;
+import com.learnenglish.repository.UserRepository;
+import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,6 +18,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class LessonService {
 
     private final LessonRepository lessonRepository;
+    private final UserRepository userRepository;
+    private final UserProgressRepository progressRepository;
 
     @Transactional(readOnly = true)
     public LessonResponse getLessonBySlug(String slug) {
@@ -43,5 +50,26 @@ public class LessonService {
 
         return new LessonResponse(lesson.getId(), lesson.getName(), lesson.getSlug(),
                 levelCode, theory, examples, exercises, vocabulary);
+    }
+
+    @Transactional
+    public void completeLesson(String slug, int score) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        var user = userRepository.findByEmail(email).orElseThrow();
+        Lesson lesson = lessonRepository.findBySlug(slug)
+                .orElseThrow(() -> new IllegalArgumentException("Lesson not found: " + slug));
+
+        UserProgress progress = progressRepository
+                .findByUserIdAndLessonId(user.getId(), lesson.getId())
+                .orElse(UserProgress.builder()
+                        .user(user)
+                        .lesson(lesson)
+                        .startedAt(LocalDateTime.now())
+                        .build());
+
+        progress.setCompleted(true);
+        progress.setScore(score);
+        progress.setCompletedAt(LocalDateTime.now());
+        progressRepository.save(progress);
     }
 }
