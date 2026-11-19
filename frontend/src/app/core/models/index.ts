@@ -125,3 +125,65 @@ export interface ExerciseSubmitResponse {
   explanation: Record<string, string> | null;
   xpEarned: number;
 }
+
+// === Theory Content Block System ===
+
+export interface InlineToken {
+  t: string;    // text
+  b?: boolean;  // bold
+  i?: boolean;  // italic
+  c?: boolean;  // inline code
+}
+
+export interface QuizOption {
+  text: string;
+  correct: boolean;
+  explanation?: string;
+}
+
+export interface WordCard {
+  word: string;
+  ipa?: string;
+  translation: string;
+  tag?: string;
+  example?: { en: string; ru: string };
+}
+
+export type BlockKind =
+  | 'heading'
+  | 'paragraph'
+  | 'list'
+  | 'table'
+  | 'rule'
+  | 'example'
+  | 'tip'
+  | 'warning'
+  | 'miniQuiz'
+  | 'cardGrid';
+
+export interface ParsedBlock {
+  kind: BlockKind;
+  // heading
+  level?: 1 | 2 | 3;
+  text?: string;
+  // paragraph
+  tokens?: InlineToken[];
+  // list
+  items?: InlineToken[][];
+  // table
+  headers?: string[];
+  rows?: string[][];
+  // rule
+  rule?: string;
+  // example
+  english?: string;
+  translation?: string;
+  note?: string;
+  // tip / warning
+  content?: string;
+  // miniQuiz
+  question?: string;
+  options?: QuizOption[];
+  // cardGrid
+  cards?: WordCard[];
+}

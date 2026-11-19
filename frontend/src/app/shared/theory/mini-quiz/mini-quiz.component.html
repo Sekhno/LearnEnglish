@@ -1,0 +1,42 @@
+<div class="mini-quiz">
+  <div class="quiz-header">
+    <span class="quiz-icon" aria-hidden="true">🤔</span>
+    <span class="quiz-label">Проверь себя</span>
+  </div>
+
+  <p class="quiz-question">{{ question() }}</p>
+
+  <div class="quiz-options" role="radiogroup" [attr.aria-label]="question()">
+    @for (opt of options(); track $index) {
+      <button
+        class="quiz-option"
+        [class]="optionClass($index)"
+        [disabled]="submitted()"
+        [attr.aria-pressed]="selected() === $index"
+        (click)="select($index)"
+      >
+        {{ opt.text }}
+      </button>
+    }
+  </div>
+
+  @if (!submitted()) {
+    <button
+      class="btn btn-primary quiz-submit"
+      [disabled]="selected() === null"
+      (click)="submit()"
+    >
+      Проверить
+    </button>
+  } @else {
+    <div class="quiz-result" [class.correct]="isCorrect()" [class.wrong]="!isCorrect()">
+      <span class="result-label">{{ isCorrect() ? '✓ Правильно!' : '✗ Не совсем.' }}</span>
+      @if (selectedExplanation) {
+        <p class="quiz-explain">{{ selectedExplanation }}</p>
+      }
+    </div>
+    <button class="btn btn-outline quiz-retry" (click)="retry()">
+      Попробовать снова
+    </button>
+  }
+</div>

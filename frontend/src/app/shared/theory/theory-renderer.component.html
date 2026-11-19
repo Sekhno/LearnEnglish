@@ -1,0 +1,134 @@
+<div class="theory-content">
+  @for (block of allParsed(); track $index) {
+    @switch (block.kind) {
+
+      @case ('heading') {
+        @if (block.level === 1) { <h1 class="th-h1">{{ block.text }}</h1> }
+        @if (block.level === 2) { <h2 class="th-h2">{{ block.text }}</h2> }
+        @if (block.level === 3) { <h3 class="th-h3">{{ block.text }}</h3> }
+      }
+
+      @case ('paragraph') {
+        <p class="th-para">
+          @for (tok of block.tokens!; track $index) {
+            @if (tok.b) { <strong>{{ tok.t }}</strong> }
+            @else if (tok.i) { <em>{{ tok.t }}</em> }
+            @else if (tok.c) { <code class="th-code">{{ tok.t }}</code> }
+            @else { {{ tok.t }} }
+          }
+        </p>
+      }
+
+      @case ('list') {
+        <ul class="th-list">
+          @for (item of block.items!; track $index) {
+            <li>
+              @for (tok of item; track $index) {
+                @if (tok.b) { <strong>{{ tok.t }}</strong> }
+                @else if (tok.i) { <em>{{ tok.t }}</em> }
+                @else if (tok.c) { <code class="th-code">{{ tok.t }}</code> }
+                @else { {{ tok.t }} }
+              }
+            </li>
+          }
+        </ul>
+      }
+
+      @case ('table') {
+        <div class="th-table-wrap">
+          <table class="th-table">
+            <thead>
+              <tr>
+                @for (h of block.headers!; track h) {
+                  <th>{{ h }}</th>
+                }
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of block.rows!; track $index) {
+                <tr>
+                  @for (cell of row; track $index) {
+                    <td>{{ cell }}</td>
+                  }
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+
+      @case ('rule') {
+        <div class="th-rule" role="note">
+          <span class="rule-icon" aria-hidden="true">📐</span>
+          <p>{{ block.rule }}</p>
+        </div>
+      }
+
+      @case ('example') {
+        <div class="th-example">
+          <div class="ex-en">
+            <span>{{ block.english }}</span>
+            <app-tts-button [text]="block.english!" />
+          </div>
+          @if (block.translation) {
+            <div class="ex-ru">{{ block.translation }}</div>
+          }
+          @if (block.note) {
+            <div class="ex-note">{{ block.note }}</div>
+          }
+        </div>
+      }
+
+      @case ('tip') {
+        <div class="th-tip" role="note">
+          <span class="tip-icon" aria-hidden="true">💡</span>
+          <p>{{ block.content }}</p>
+        </div>
+      }
+
+      @case ('warning') {
+        <div class="th-warning" role="note">
+          <span class="warn-icon" aria-hidden="true">⚠️</span>
+          <p>{{ block.content }}</p>
+        </div>
+      }
+
+      @case ('miniQuiz') {
+        <app-mini-quiz
+          [question]="block.question!"
+          [options]="block.options!"
+        />
+      }
+
+      @case ('cardGrid') {
+        <div class="th-card-grid">
+          @for (card of block.cards!; track card.word) {
+            <div class="word-card">
+              <div class="wc-top">
+                <span class="wc-word">{{ card.word }}</span>
+                @if (card.ipa) {
+                  <span class="wc-ipa">{{ card.ipa }}</span>
+                }
+              </div>
+              <div class="wc-translation">{{ card.translation }}</div>
+              @if (card.tag) {
+                <span class="wc-tag">{{ card.tag }}</span>
+              }
+              @if (card.example) {
+                <div class="wc-example">
+                  <div class="wce-en">
+                    <span>{{ card.example.en }}</span>
+                    <app-tts-button [text]="card.example.en" />
+                  </div>
+                  <div class="wce-ru">{{ card.example.ru }}</div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      }
+
+      @default { }
+    }
+  }
+</div>

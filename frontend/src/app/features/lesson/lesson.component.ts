@@ -1,18 +1,21 @@
-import { Component, OnInit, signal, computed } from '@angular/core';
+import { Component, OnInit, signal, computed, inject, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { LessonService } from '../../core/services/lesson.service';
+import { TtsService } from '../../core/services/tts.service';
 import { LessonResponse, Exercise, ExerciseSubmitResponse } from '../../core/models';
+import { TheoryRendererComponent } from '../../shared/theory/theory-renderer.component';
+import { TtsButtonComponent } from '../../shared/components/tts-button/tts-button.component';
 
 type LessonTab = 'theory' | 'practice' | 'vocabulary';
 
 @Component({
   selector: 'app-lesson',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, TheoryRendererComponent, TtsButtonComponent],
   templateUrl: './lesson.component.html',
   styleUrl: './lesson.component.scss'
 })
-export class LessonComponent implements OnInit {
+export class LessonComponent implements OnInit, OnDestroy {
   lesson   = signal<LessonResponse | null>(null);
   loading  = signal(true);
   error    = signal('');
@@ -37,6 +40,8 @@ export class LessonComponent implements OnInit {
     const lesson = this.lesson();
     return !lesson || this.currentExerciseIdx() >= lesson.exercises.length - 1;
   });
+
+  private tts = inject(TtsService);
 
   constructor(
     private route: ActivatedRoute,
@@ -84,6 +89,10 @@ export class LessonComponent implements OnInit {
       },
       error: () => this.submitting.set(false)
     });
+  }
+
+  ngOnDestroy(): void {
+    this.tts.stop();
   }
 
   nextExercise(): void {

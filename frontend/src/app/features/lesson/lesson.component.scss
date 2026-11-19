@@ -98,20 +98,9 @@
 @keyframes spin { to { transform: rotate(360deg); } }
 
 /* ===== THEORY ===== */
-.theory-section { display: flex; flex-direction: column; gap: 16px; margin-bottom: 24px; }
-
-.theory-card {
-  padding: 24px;
-  font-size: 15px;
-  line-height: 1.7;
-  color: var(--text-primary);
-
-  /* Markdown-like styles */
-  :deep(strong) { font-weight: 700; }
-  :deep(em)     { font-style: italic; color: var(--primary-dark); }
-  :deep(table)  { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 14px; }
-  :deep(th), :deep(td) { border: 1px solid var(--border); padding: 8px 12px; text-align: left; }
-  :deep(th)     { background: var(--bg-page); font-weight: 600; }
+.theory-section {
+  padding: 28px;
+  margin-bottom: 24px;
 }
 
 .examples-section { padding: 24px; margin-bottom: 24px; }
@@ -125,7 +114,14 @@
   border-radius: var(--radius-sm);
   border-left: 3px solid var(--primary);
 
-  .example-en { font-weight: 600; font-size: 15px; color: var(--text-primary); }
+  .example-en {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--text-primary);
+  }
   .example-ru { font-size: 14px; color: var(--text-secondary); margin-top: 4px; }
 }
 
@@ -243,7 +239,7 @@
 .vocab-card {
   padding: 20px;
 
-  .vocab-word        { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+  .vocab-word        { display: flex; align-items: center; gap: 8px; font-size: 20px; font-weight: 700; margin-bottom: 4px; }
   .vocab-ipa         { font-size: 13px; color: var(--text-secondary); margin-bottom: 8px; font-style: italic; }
   .vocab-translation { font-size: 15px; font-weight: 500; color: var(--primary); }
   .vocab-examples    { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); }
