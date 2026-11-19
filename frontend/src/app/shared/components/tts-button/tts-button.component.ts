@@ -12,17 +12,18 @@ import { TtsService } from '../../../core/services/tts.service';
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    @if (tts.supported) {
-      <button
-        class="tts-btn"
-        [class.speaking]="isActive()"
-        [attr.aria-label]="isActive() ? 'Stop' : 'Read aloud'"
-        title="Listen"
-        (click)="toggle()"
-      >
-        {{ isActive() ? '⏸' : '🔊' }}
-      </button>
-    }
+    <button
+      class="tts-btn"
+      [class.speaking]="isActive()"
+      [class.loading]="isLoading()"
+      [attr.aria-label]="isActive() ? 'Stop' : 'Read aloud'"
+      title="Listen"
+      [disabled]="isLoading()"
+      (click)="toggle()"
+    >
+      @if (isLoading()) { <span class="tts-spinner"></span> }
+      @else { {{ isActive() ? '⏸' : '🔊' }} }
+    </button>
   `,
   styles: [`
     .tts-btn {
@@ -51,16 +52,30 @@ import { TtsService } from '../../../core/services/tts.service';
       background: var(--primary-light);
       color: var(--primary);
     }
+    .tts-btn.loading {
+      border-color: var(--border);
+      opacity: .7;
+    }
+    .tts-spinner {
+      display: block;
+      width: 11px;
+      height: 11px;
+      border: 2px solid var(--border);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: tts-spin .6s linear infinite;
+    }
+    @keyframes tts-spin { to { transform: rotate(360deg); } }
   `]
 })
 export class TtsButtonComponent {
   text = input.required<string>();
-  lang = input<string>('en-US');
 
   tts = inject(TtsService);
-  isActive = computed(() => this.tts.currentSpeakingText() === this.text());
+  isActive  = computed(() => this.tts.currentSpeakingText() === this.text());
+  isLoading = computed(() => this.tts.isLoading() && this.tts.currentSpeakingText() === this.text());
 
   toggle(): void {
-    this.tts.speak(this.text(), this.lang());
+    void this.tts.speak(this.text());
   }
 }

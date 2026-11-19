@@ -1,59 +1,85 @@
 import { Injectable, signal } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
+
+const PIPER_VOICE = 'en_GB-alan-low';
 
 @Injectable({ providedIn: 'root' })
 export class TtsService {
-  private synth: SpeechSynthesis | null =
-    typeof window !== 'undefined' && 'speechSynthesis' in window
-      ? window.speechSynthesis
-      : null;
-
   private _activeText = signal<string | null>(null);
+  private _loading    = signal(false);
 
   readonly currentSpeakingText = this._activeText.asReadonly();
+  readonly isLoading           = this._loading.asReadonly();
 
-  get supported(): boolean {
-    return this.synth !== null;
+  private currentAudio: HTMLAudioElement | null = null;
+
+  readonly supported = true;
+
+  constructor(private http: HttpClient) {}
+
+  async speak(text: string): Promise<void> {
+    const clean = this.stripMarkdown(text);
+    if (!clean) return;
+
+    // Toggle off if same text is playing
+    if (this._activeText() === text) {
+      this.stop();
+      return;
+    }
+
+    this.stop();
+
+    this._activeText.set(text);
+    this._loading.set(true);
+
+    try {
+      const blob = await firstValueFrom(
+        this.http.post('/tts/synthesize', { text: clean, voice: PIPER_VOICE }, { responseType: 'blob' })
+      );
+
+      const url = URL.createObjectURL(blob);
+      const audio = new Audio(url);
+      this.currentAudio = audio;
+
+      audio.onended = () => {
+        URL.revokeObjectURL(url);
+        this._activeText.set(null);
+        this._loading.set(false);
+        this.currentAudio = null;
+      };
+
+      audio.onerror = () => {
+        URL.revokeObjectURL(url);
+        this._activeText.set(null);
+        this._loading.set(false);
+        this.currentAudio = null;
+      };
+
+      this._loading.set(false);
+      await audio.play();
+
+    } catch {
+      this._activeText.set(null);
+      this._loading.set(false);
+    }
   }
 
-  speak(text: string, lang = 'en-US'): void {
-    if (!this.synth) return;
+  stop(): void {
+    if (this.currentAudio) {
+      this.currentAudio.pause();
+      this.currentAudio = null;
+    }
+    this._activeText.set(null);
+    this._loading.set(false);
+  }
 
-    // Strip Markdown syntax before speaking
-    const clean = text
+  private stripMarkdown(text: string): string {
+    return text
       .replace(/\*\*/g, '')
       .replace(/\*/g, '')
       .replace(/`/g, '')
       .replace(/#+\s/g, '')
       .trim();
-
-    if (!clean) return;
-
-    // Toggle off if the same text is already playing
-    if (this.synth.speaking && this._activeText() === text) {
-      this.synth.cancel();
-      this._activeText.set(null);
-      return;
-    }
-
-    if (this.synth.speaking) {
-      this.synth.cancel();
-    }
-
-    const utt = new SpeechSynthesisUtterance(clean);
-    utt.lang = lang;
-    utt.rate = 0.9;
-    utt.pitch = 1.0;
-
-    utt.onstart = () => this._activeText.set(text);
-    utt.onend   = () => this._activeText.set(null);
-    utt.onerror = () => this._activeText.set(null);
-
-    this._activeText.set(text);
-    this.synth.speak(utt);
-  }
-
-  stop(): void {
-    this.synth?.cancel();
-    this._activeText.set(null);
   }
 }
