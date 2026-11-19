@@ -39,10 +39,8 @@
         <div class="tab-content fade-in">
 
           @if (l.theory.length > 0) {
-            <section class="theory-section">
-              @for (block of l.theory; track block.id) {
-                <div class="card theory-card" [innerHTML]="block.content"></div>
-              }
+            <section class="theory-section card">
+              <app-theory-renderer [blocks]="l.theory" />
             </section>
           }
 
@@ -52,7 +50,10 @@
               <div class="examples-list">
                 @for (ex of l.examples; track ex.id) {
                   <div class="example-row">
-                    <div class="example-en">{{ ex.englishText }}</div>
+                    <div class="example-en">
+                      <span>{{ ex.englishText }}</span>
+                      <app-tts-button [text]="ex.englishText" />
+                    </div>
                     <div class="example-ru">{{ ex.translation }}</div>
                   </div>
                 }
@@ -176,7 +177,10 @@
           <div class="vocab-grid">
             @for (v of l.vocabulary; track v.id) {
               <div class="vocab-card card">
-                <div class="vocab-word">{{ v.word }}</div>
+                <div class="vocab-word">
+                  {{ v.word }}
+                  <app-tts-button [text]="v.word" />
+                </div>
                 @if (v.ipa) { <div class="vocab-ipa">{{ v.ipa }}</div> }
                 <div class="vocab-translation">{{ v.translation }}</div>
                 @if (v.examples && v.examples.length > 0) {

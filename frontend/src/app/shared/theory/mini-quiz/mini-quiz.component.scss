@@ -1,0 +1,113 @@
+.mini-quiz {
+  background: var(--bg-page);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 20px;
+}
+
+.quiz-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.quiz-icon { font-size: 18px; }
+
+.quiz-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .6px;
+  color: var(--text-secondary);
+}
+
+.quiz-question {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.5;
+  margin-bottom: 14px;
+}
+
+.quiz-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.quiz-option {
+  width: 100%;
+  padding: 11px 16px;
+  border: 2px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  text-align: left;
+  color: var(--text-primary);
+  background: var(--bg-card);
+  transition: var(--transition);
+  cursor: pointer;
+  font-family: inherit;
+
+  &:hover:not(:disabled):not(.correct):not(.wrong):not(.dim) {
+    border-color: var(--primary);
+    background: var(--primary-light);
+    color: var(--primary);
+  }
+
+  &.selected {
+    border-color: var(--primary);
+    background: var(--primary-light);
+    color: var(--primary);
+  }
+
+  &.correct {
+    border-color: var(--success);
+    background: var(--success-light);
+    color: #166534;
+    font-weight: 600;
+  }
+
+  &.wrong {
+    border-color: var(--danger);
+    background: var(--danger-light);
+    color: #991B1B;
+  }
+
+  &.dim { opacity: .4; }
+
+  &:disabled { cursor: default; }
+}
+
+.quiz-submit {
+  font-size: 13px;
+  padding: 8px 20px;
+}
+
+.quiz-result {
+  padding: 12px 16px;
+  border-radius: var(--radius-sm);
+  margin-bottom: 10px;
+
+  &.correct { background: var(--success-light); color: #166534; }
+  &.wrong   { background: var(--danger-light);  color: #991B1B; }
+}
+
+.result-label {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.quiz-explain {
+  font-size: 13px;
+  font-weight: 400;
+  margin-top: 6px;
+  line-height: 1.5;
+  opacity: .9;
+}
+
+.quiz-retry {
+  font-size: 13px;
+  padding: 7px 16px;
+}
