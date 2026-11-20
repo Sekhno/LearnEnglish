@@ -126,6 +126,30 @@ export interface ExerciseSubmitResponse {
   xpEarned: number;
 }
 
+// AI Practice
+export interface AiMessage {
+  role: 'user' | 'assistant';
+  content: string;
+}
+
+export interface AiChatRequest {
+  scenario: string;
+  level: string;
+  messages: AiMessage[];
+}
+
+export interface AiChatResponse {
+  content: string;
+}
+
+export interface AiScenario {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+  hint: string;
+}
+
 // === Theory Content Block System ===
 
 export interface InlineToken {

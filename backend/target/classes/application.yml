@@ -33,6 +33,11 @@ server:
   servlet:
     context-path: /api
 
+ai:
+  llm:
+    base-url: http://127.0.0.1:1234
+    model: qwen3.5-9b
+
 logging:
   level:
     com.learnenglish: DEBUG
