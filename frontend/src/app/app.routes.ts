@@ -21,5 +21,10 @@ export const routes: Routes = [
     loadComponent: () => import('./features/lesson/lesson.component').then(m => m.LessonComponent),
     canActivate: [authGuard]
   },
+  {
+    path: 'ai-practice',
+    loadComponent: () => import('./features/ai-practice/ai-practice.component').then(m => m.AiPracticeComponent),
+    canActivate: [authGuard]
+  },
   { path: '**', redirectTo: '/dashboard' }
 ];
