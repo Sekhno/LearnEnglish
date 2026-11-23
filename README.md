@@ -12,6 +12,7 @@
 | Миграции | Flyway |
 | Аутентификация | JWT (jjwt 0.12) |
 | Контейнеры | Docker / Docker Compose |
+| TTS | Piper TTS (en_GB-alan-low) |
 
 ## Структура проекта
 
@@ -29,8 +30,10 @@ LearnEnglish/
 │   └── src/main/resources/
 │       ├── application.yml
 │       └── db/migration/
-│           ├── V1__init_schema.sql # Полная схема БД
-│           └── V2__seed_a1_content.sql # Контент уровня A1
+│           ├── V1__init_schema.sql       # Полная схема БД
+│           ├── V2__seed_a1_content.sql   # Контент уровня A1
+│           ├── V3__enrich_demonstratives.sql
+│           └── V4__seed_lesson_vocabulary.sql # Словари 20 уроков A1
 ├── frontend/                       # Angular приложение
 │   └── src/app/
 │       ├── core/                   # Models, Services, Guards, Interceptors
@@ -38,6 +41,9 @@ LearnEnglish/
 │           ├── auth/               # Login / Register
 │           ├── dashboard/          # Главный экран пользователя
 │           └── lesson/             # Просмотр урока и упражнения
+├── piper/                          # Piper TTS Docker-сервис
+│   └── Dockerfile
+├── piper-tts.sh                    # Запуск TTS локально (macOS/Linux)
 ├── docker-compose.yml
 └── TECHNICAL.md                    # Полное техническое задание
 ```
@@ -45,24 +51,27 @@ LearnEnglish/
 ## Быстрый старт
 
 ### Требования
-- Java 21+
-- Maven 3.9+
-- Node.js 20+
 - Docker & Docker Compose
 
 ### Запуск через Docker (рекомендуется)
 
 ```bash
-docker-compose up --build
+docker compose up --build
 ```
 
-Приложение будет доступно на `http://localhost:4200`
+| Сервис | URL |
+|--------|-----|
+| Приложение | `http://localhost:4200` |
+| Backend API | `http://localhost:8080/api` |
+| Piper TTS | `http://localhost:5000` |
+
+> **Первый запуск:** Piper автоматически скачивает голосовую модель `en_GB-alan-low` (~63 MB) в Docker Volume. Последующие запуски используют кэш.
 
 ### Локальная разработка
 
-**1. База данных**
+**1. База данных + Piper TTS**
 ```bash
-docker-compose up postgres -d
+docker compose up postgres piper -d
 ```
 
 **2. Backend**
@@ -80,6 +89,22 @@ npm start
 ```
 Приложение: `http://localhost:4200`
 
+> **macOS/Linux без Docker:** установите piper-tts (`pip install piper-tts`, Python 3.9–3.12) и запустите `./piper-tts.sh` вместо `docker compose up piper`.
+
+## Piper TTS
+
+Синтез речи обеспечивает озвучивание слов в разделе **Vocabulary** и примеров в разделе **Theory**.
+
+| Параметр | Значение |
+|----------|---------|
+| Движок | [Piper TTS](https://github.com/rhasspy/piper) |
+| Голос | `en_GB-alan-low` (британский мужской) |
+| Порт | 5000 |
+| Эндпоинт | `POST /synthesize` → WAV-поток |
+
+Фронтенд обращается к `/tts/synthesize`, nginx проксирует на контейнер `piper:5000`.
+В режиме `ng serve` проксирование настроено в `src/proxy.conf.json`.
+
 ## API
 
 | Метод | Endpoint | Описание | Auth |
@@ -89,6 +114,7 @@ npm start
 | GET | `/api/dashboard` | Данные дашборда | JWT |
 | GET | `/api/lessons/{slug}` | Урок по slug | JWT |
 | POST | `/api/exercises/submit` | Проверка ответа | JWT |
+| POST | `/tts/synthesize` | Синтез речи (Piper) | Нет |
 
 ## Учебная программа
 
@@ -140,8 +166,8 @@ npm start
 ## Дорожная карта
 
 ```
-MVP (сейчас)     → A1 контент, упражнения, дашборд, авторизация
-Phase 2          → Словарные карточки, TTS аудио, аудирование, интервальное повторение
+MVP (сейчас)     → A1 контент (20 уроков), упражнения, словари с TTS, дашборд, авторизация
+Phase 2          → Словарные карточки, аудирование, интервальное повторение (FSRS)
 Phase 3          → AI диалоги, голосовые упражнения, персонализированные объяснения
 Phase 4          → Адаптивное обучение, входное тестирование, аналитика
 Phase 5          → A2–C1 контент, редактор уроков, локализация
