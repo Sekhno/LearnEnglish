@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -44,12 +44,7 @@ public class DashboardService {
                 user.getDailyGoalMinutes()
         );
 
-        List<DashboardResponse.LevelProgress> levelProgress = Arrays.stream(CefrLevel.values())
-                .map(level -> buildLevelProgress(level, user.getId()))
-                .toList();
-
-        CefrLevel currentLevel = CefrLevel.valueOf(user.getCurrentLevel());
-        List<DashboardResponse.TopicStatus> topics = buildTopicStatus(currentLevel, user.getId());
+        List<DashboardResponse.LevelProgress> levelProgress = buildAllLevelProgress(user.getId());
 
         List<DashboardResponse.SkillProgress> skills = List.of(
                 new DashboardResponse.SkillProgress("Reading", 0),
@@ -61,15 +56,32 @@ public class DashboardService {
         long reviewsDue = reviewItemRepository.countByUserIdAndDueDateLessThanEqual(
                 user.getId(), LocalDateTime.now());
 
-        return new DashboardResponse(userStats, levelProgress, topics, skills, (int) reviewsDue);
+        return new DashboardResponse(userStats, levelProgress, skills, (int) reviewsDue);
     }
 
-    private DashboardResponse.LevelProgress buildLevelProgress(CefrLevel level, Long userId) {
-        long total = lessonRepository.countPublishedByLevel(level);
-        List<UserProgress> progress = progressRepository.findByUserIdAndLevel(userId, level);
-        long completed = progress.stream().filter(UserProgress::getCompleted).count();
-        int percent = total > 0 ? (int) ((completed * 100) / total) : 0;
-        return new DashboardResponse.LevelProgress(level, level.getDisplayName(), total, completed, percent);
+    private List<DashboardResponse.LevelProgress> buildAllLevelProgress(Long userId) {
+        CefrLevel[] levels = CefrLevel.values();
+        List<DashboardResponse.LevelProgress> result = new ArrayList<>();
+        boolean previousLevelComplete = true; // A1 always accessible
+
+        for (CefrLevel level : levels) {
+            boolean unlocked = previousLevelComplete;
+
+            long total = lessonRepository.countPublishedByLevel(level);
+            List<UserProgress> progress = progressRepository.findByUserIdAndLevel(userId, level);
+            long completed = progress.stream().filter(UserProgress::getCompleted).count();
+            int percent = total > 0 ? (int) ((completed * 100) / total) : 0;
+
+            List<DashboardResponse.TopicStatus> topics = unlocked
+                    ? buildTopicStatus(level, userId)
+                    : List.of();
+
+            result.add(new DashboardResponse.LevelProgress(
+                    level, level.getDisplayName(), total, completed, percent, unlocked, topics));
+
+            previousLevelComplete = (total > 0 && completed >= total);
+        }
+        return result;
     }
 
     private List<DashboardResponse.TopicStatus> buildTopicStatus(CefrLevel level, Long userId) {
@@ -80,14 +92,14 @@ public class DashboardService {
                 .collect(Collectors.toMap(p -> p.getLesson().getId(), p -> p));
 
         boolean previousCompleted = true;
-        java.util.List<DashboardResponse.TopicStatus> result = new java.util.ArrayList<>();
+        List<DashboardResponse.TopicStatus> result = new ArrayList<>();
 
         for (int i = 0; i < lessons.size(); i++) {
             var lesson = lessons.get(i);
-            UserProgress progress = progressMap.get(lesson.getId());
-            boolean completed = progress != null && progress.getCompleted();
+            UserProgress p = progressMap.get(lesson.getId());
+            boolean completed = p != null && p.getCompleted();
             boolean locked = i > 0 && !previousCompleted;
-            Integer score = progress != null ? progress.getScore() : null;
+            Integer score = p != null ? p.getScore() : null;
 
             result.add(new DashboardResponse.TopicStatus(
                     lesson.getId(), lesson.getName(), lesson.getSlug(),

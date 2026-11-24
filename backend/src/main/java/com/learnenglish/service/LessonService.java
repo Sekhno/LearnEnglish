@@ -71,5 +71,31 @@ public class LessonService {
         progress.setScore(score);
         progress.setCompletedAt(LocalDateTime.now());
         progressRepository.save(progress);
+
+        // Advance currentLevel if all lessons in this level are now complete
+        advanceLevelIfComplete(user, lesson);
+    }
+
+    private void advanceLevelIfComplete(com.learnenglish.model.User user, Lesson lesson) {
+        com.learnenglish.model.enums.CefrLevel lessonLevel =
+                lesson.getTopic().getModule().getCourse().getLevel().getCode();
+        com.learnenglish.model.enums.CefrLevel userLevel =
+                com.learnenglish.model.enums.CefrLevel.valueOf(user.getCurrentLevel());
+
+        if (lessonLevel != userLevel) return;
+
+        long total = lessonRepository.countPublishedByLevel(userLevel);
+        long completed = progressRepository.findByUserIdAndLevel(user.getId(), userLevel)
+                .stream().filter(com.learnenglish.model.UserProgress::getCompleted).count();
+
+        if (total > 0 && completed >= total) {
+            com.learnenglish.model.enums.CefrLevel[] levels =
+                    com.learnenglish.model.enums.CefrLevel.values();
+            int nextIdx = userLevel.ordinal() + 1;
+            if (nextIdx < levels.length) {
+                user.setCurrentLevel(levels[nextIdx].name());
+                userRepository.save(user);
+            }
+        }
     }
 }

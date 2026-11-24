@@ -26,12 +26,14 @@ export class DashboardComponent implements OnInit {
   readonly TOTAL_LEVELS = 5;
   readonly TOTAL_SKILLS = 4;
 
-  currentTopics = computed<TopicStatus[]>(() => {
+  currentLevelData = computed<LevelProgress | null>(() => {
     const d = this.dashboard();
-    if (!d) return [];
-    const level = this.activeLevel();
-    if (d.userStats.currentLevel === level) return d.currentLevelTopics;
-    return [];
+    if (!d) return null;
+    return d.levelProgress.find(l => l.code === this.activeLevel()) ?? null;
+  });
+
+  currentTopics = computed<TopicStatus[]>(() => {
+    return this.currentLevelData()?.topics ?? [];
   });
 
   constructor(
@@ -42,13 +44,17 @@ export class DashboardComponent implements OnInit {
 
   ngOnInit(): void {
     this.dashService.getDashboard().subscribe({
-      next: (data) => { this.dashboard.set(data); this.loading.set(false); },
-      error: ()     => { this.error.set('Failed to load dashboard.'); this.loading.set(false); }
+      next: (data) => {
+        this.dashboard.set(data);
+        this.activeLevel.set(data.userStats.currentLevel);
+        this.loading.set(false);
+      },
+      error: () => { this.error.set('Failed to load dashboard.'); this.loading.set(false); }
     });
   }
 
-  selectLevel(code: string): void {
-    this.activeLevel.set(code);
+  selectLevel(code: string, unlocked: boolean): void {
+    if (unlocked) this.activeLevel.set(code);
   }
 
   startLesson(topic: TopicStatus): void {
