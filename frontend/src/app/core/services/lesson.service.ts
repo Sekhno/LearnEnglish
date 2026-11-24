@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { ExerciseSubmitRequest, ExerciseSubmitResponse, LessonResponse } from '../models';
+import { ExerciseSubmitRequest, ExerciseSubmitResponse, LessonResponse, VerbEntry } from '../models';
 import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
@@ -18,5 +18,9 @@ export class LessonService {
 
   completeLesson(slug: string, score: number): Observable<void> {
     return this.http.post<void>(`${environment.apiUrl}/lessons/${slug}/complete`, { score });
+  }
+
+  getVerbVocab(slug: string): Observable<VerbEntry[]> {
+    return this.http.get<VerbEntry[]>(`${environment.apiUrl}/verb-vocab/${slug}`);
   }
 }

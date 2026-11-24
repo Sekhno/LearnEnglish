@@ -127,6 +127,27 @@ export interface ExerciseSubmitResponse {
   xpEarned: number;
 }
 
+// Verb Vocabulary (Past Simple)
+export interface VerbEntry {
+  id: number;
+  v1: string;
+  v2: string;
+  v3: string;
+  v1Ipa: string | null;
+  v2Ipa: string | null;
+  v3Ipa: string | null;
+  translation: string;
+  exampleV2: string | null;
+  exampleTrans: string | null;
+  verbType: 'regular' | 'irregular';
+  spellingRule: 'standard' | 'double' | 'drop_e' | 'change_to_ied' | null;
+  pronunciation: '/t/' | '/d/' | '/ɪd/' | null;
+  verbPattern: 'AAA' | 'ABB' | 'ABA' | 'ABC' | null;
+  difficulty: 'essential' | 'common' | 'extended';
+  altV2: string | null;
+  altV3: string | null;
+}
+
 // AI Practice
 export interface AiMessage {
   role: 'user' | 'assistant';

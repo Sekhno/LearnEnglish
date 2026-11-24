@@ -5,13 +5,14 @@ import { TtsService } from '../../core/services/tts.service';
 import { LessonResponse, Exercise, ExerciseSubmitResponse } from '../../core/models';
 import { TheoryRendererComponent } from '../../shared/theory/theory-renderer.component';
 import { TtsButtonComponent } from '../../shared/components/tts-button/tts-button.component';
+import { VerbVocabComponent } from './verb-vocab/verb-vocab.component';
 
 type LessonTab = 'theory' | 'practice' | 'vocabulary';
 
 @Component({
   selector: 'app-lesson',
   standalone: true,
-  imports: [RouterLink, TheoryRendererComponent, TtsButtonComponent],
+  imports: [RouterLink, TheoryRendererComponent, TtsButtonComponent, VerbVocabComponent],
   templateUrl: './lesson.component.html',
   styleUrl: './lesson.component.scss'
 })

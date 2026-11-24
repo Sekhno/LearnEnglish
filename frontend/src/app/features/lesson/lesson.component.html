@@ -171,28 +171,37 @@
       <!-- VOCABULARY TAB -->
       @if (activeTab() === 'vocabulary') {
         <div class="tab-content fade-in">
-          @if (l.vocabulary.length === 0) {
-            <div class="empty-card card">No vocabulary for this lesson yet.</div>
-          }
-          <div class="vocab-grid">
-            @for (v of l.vocabulary; track v.id) {
-              <div class="vocab-card card">
-                <div class="vocab-word">
-                  {{ v.word }}
-                  <app-tts-button [text]="v.word" />
-                </div>
-                @if (v.ipa) { <div class="vocab-ipa">{{ v.ipa }}</div> }
-                <div class="vocab-translation">{{ v.translation }}</div>
-                @if (v.examples && v.examples.length > 0) {
-                  <div class="vocab-examples">
-                    @for (ex of v.examples.slice(0, 1); track ex) {
-                      <p class="vocab-ex">{{ ex }}</p>
-                    }
-                  </div>
-                }
-              </div>
+
+          @if (l.slug === 'a2-past-simple') {
+            <!-- Full verb vocabulary table for Past Simple -->
+            <section class="card verb-vocab-card">
+              <app-verb-vocab [lessonSlug]="l.slug" />
+            </section>
+          } @else {
+            @if (l.vocabulary.length === 0) {
+              <div class="empty-card card">No vocabulary for this lesson yet.</div>
             }
-          </div>
+            <div class="vocab-grid">
+              @for (v of l.vocabulary; track v.id) {
+                <div class="vocab-card card">
+                  <div class="vocab-word">
+                    {{ v.word }}
+                    <app-tts-button [text]="v.word" />
+                  </div>
+                  @if (v.ipa) { <div class="vocab-ipa">{{ v.ipa }}</div> }
+                  <div class="vocab-translation">{{ v.translation }}</div>
+                  @if (v.examples && v.examples.length > 0) {
+                    <div class="vocab-examples">
+                      @for (ex of v.examples.slice(0, 1); track ex) {
+                        <p class="vocab-ex">{{ ex }}</p>
+                      }
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          }
+
         </div>
       }
     }

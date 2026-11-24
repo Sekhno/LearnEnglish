@@ -1,0 +1,214 @@
+@if (loading()) {
+  <div class="vv-loading">
+    <div class="spinner-sm"></div>
+    <span>Loading verbs...</span>
+  </div>
+} @else {
+
+  <!-- HEADER STATS -->
+  <div class="vv-header">
+    <div class="vv-counts">
+      <span class="count-badge regular">{{ regularCount() }} regular</span>
+      <span class="count-badge irregular">{{ irregularCount() }} irregular</span>
+      <span class="count-badge total">{{ verbs().length }} total</span>
+    </div>
+    <label class="trans-toggle">
+      <input type="checkbox" [checked]="showTrans()" (change)="showTrans.set(!showTrans())">
+      Show translation
+    </label>
+  </div>
+
+  <!-- TYPE TABS -->
+  <div class="vv-tabs">
+    <button class="vv-tab" [class.active]="typeFilter() === 'all'"       (click)="setType('all')">
+      All ({{ verbs().length }})
+    </button>
+    <button class="vv-tab" [class.active]="typeFilter() === 'regular'"   (click)="setType('regular')">
+      Regular ({{ regularCount() }})
+    </button>
+    <button class="vv-tab" [class.active]="typeFilter() === 'irregular'" (click)="setType('irregular')">
+      Irregular ({{ irregularCount() }})
+    </button>
+  </div>
+
+  <!-- FILTERS -->
+  <div class="vv-filters">
+    <input class="vv-search input"
+           placeholder="Search verb or translation…"
+           [value]="searchQuery()"
+           (input)="searchQuery.set($any($event.target).value)" />
+
+    <div class="filter-row">
+      <!-- Difficulty -->
+      <div class="filter-chips">
+        @for (d of [['all','All'],['essential','Essential'],['common','Common'],['extended','Extended']]; track d[0]) {
+          <button class="chip" [class.active]="diffFilter() === d[0]"
+                  (click)="diffFilter.set($any(d[0]))">{{ d[1] }}</button>
+        }
+      </div>
+
+      <!-- Group filter (only when type selected) -->
+      @if (groupOptions().length > 0) {
+        <select class="vv-select" [value]="groupFilter()"
+                (change)="groupFilter.set($any($event.target).value)">
+          @for (opt of groupOptions(); track opt.value) {
+            <option [value]="opt.value">{{ opt.label }}</option>
+          }
+        </select>
+      }
+    </div>
+  </div>
+
+  <!-- RESULTS COUNT -->
+  <div class="vv-result-info">
+    {{ filtered().length }} verb{{ filtered().length !== 1 ? 's' : '' }}
+  </div>
+
+  <!-- VERB TABLE (desktop) / CARDS (mobile) -->
+  @if (filtered().length === 0) {
+    <div class="vv-empty">No verbs match your filters.</div>
+  } @else {
+
+    <!-- Desktop table -->
+    <div class="vv-table-wrap">
+      <table class="vv-table">
+        <thead>
+          <tr>
+            <th>V1 (base)</th>
+            <th>V2 (past)</th>
+            <th>V3 (participle)</th>
+            @if (showTrans()) { <th>Translation</th> }
+            <th>Type</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (v of filtered(); track v.id) {
+            <tr class="verb-row" [class.expanded]="expandedId() === v.id"
+                (click)="toggleExpand(v.id)">
+              <td class="form-cell">
+                <span class="form">{{ v.v1 }}</span>
+                @if (v.v1Ipa) { <span class="ipa">{{ v.v1Ipa }}</span> }
+                <button class="tts-btn" [class.speaking]="isSpeaking(v.v1)"
+                        (click)="speak(v.v1); $event.stopPropagation()" title="Listen">
+                  {{ isSpeaking(v.v1) ? '■' : '▶' }}
+                </button>
+              </td>
+              <td class="form-cell">
+                <span class="form">{{ v.v2 }}</span>
+                @if (v.v2Ipa) { <span class="ipa">{{ v.v2Ipa }}</span> }
+                <button class="tts-btn" [class.speaking]="isSpeaking(v.v2)"
+                        (click)="speak(v.v2); $event.stopPropagation()" title="Listen">
+                  {{ isSpeaking(v.v2) ? '■' : '▶' }}
+                </button>
+                @if (v.altV2) { <span class="alt">/ {{ v.altV2 }}</span> }
+              </td>
+              <td class="form-cell">
+                <span class="form">{{ v.v3 }}</span>
+                @if (v.v3Ipa) { <span class="ipa">{{ v.v3Ipa }}</span> }
+                <button class="tts-btn" [class.speaking]="isSpeaking(v.v3)"
+                        (click)="speak(v.v3); $event.stopPropagation()" title="Listen">
+                  {{ isSpeaking(v.v3) ? '■' : '▶' }}
+                </button>
+                @if (v.altV3) { <span class="alt">/ {{ v.altV3 }}</span> }
+              </td>
+              @if (showTrans()) {
+                <td class="trans-cell">{{ v.translation }}</td>
+              }
+              <td class="meta-cell">
+                @if (v.verbType === 'regular') {
+                  <span class="tag tag-rule">{{ spellingLabel(v.spellingRule) }}</span>
+                  <span class="tag tag-pron">{{ v.pronunciation }}</span>
+                } @else {
+                  <span class="tag tag-pattern">{{ v.verbPattern }}</span>
+                }
+                <span class="diff-dot" [style.background]="diffColor(v.difficulty)"
+                      [title]="v.difficulty"></span>
+              </td>
+              <td class="expand-cell">
+                <span class="expand-icon">{{ expandedId() === v.id ? '▲' : '▼' }}</span>
+              </td>
+            </tr>
+
+            @if (expandedId() === v.id) {
+              <tr class="example-row">
+                <td [attr.colspan]="showTrans() ? 6 : 5">
+                  <div class="example-block">
+                    @if (v.exampleV2) {
+                      <div class="ex-en">
+                        {{ v.exampleV2 }}
+                        <button class="tts-btn inline" [class.speaking]="isSpeaking(v.exampleV2!)"
+                                (click)="speak(v.exampleV2!)">
+                          {{ isSpeaking(v.exampleV2!) ? '■' : '▶' }}
+                        </button>
+                      </div>
+                    }
+                    @if (v.exampleTrans) {
+                      <div class="ex-uk">{{ v.exampleTrans }}</div>
+                    }
+                  </div>
+                </td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Mobile cards -->
+    <div class="vv-cards">
+      @for (v of filtered(); track v.id) {
+        <div class="vv-card" [class.expanded]="expandedId() === v.id">
+          <div class="card-header" (click)="toggleExpand(v.id)">
+            <div class="card-forms">
+              <span class="form">{{ v.v1 }}</span>
+              <span class="sep">→</span>
+              <span class="form v2">{{ v.v2 }}</span>
+              <span class="sep">→</span>
+              <span class="form v3">{{ v.v3 }}</span>
+            </div>
+            <div class="card-meta">
+              @if (v.verbType === 'irregular') {
+                <span class="tag tag-pattern">{{ v.verbPattern }}</span>
+              } @else {
+                <span class="tag tag-pron">{{ v.pronunciation }}</span>
+              }
+              <span class="diff-dot" [style.background]="diffColor(v.difficulty)"></span>
+              <span class="expand-icon">{{ expandedId() === v.id ? '▲' : '▼' }}</span>
+            </div>
+          </div>
+
+          @if (expandedId() === v.id) {
+            <div class="card-body">
+              @if (showTrans()) {
+                <div class="card-trans">{{ v.translation }}</div>
+              }
+              <div class="card-tts">
+                @for (pair of [[v.v1, v.v1Ipa],[v.v2, v.v2Ipa],[v.v3, v.v3Ipa]]; track $index) {
+                  <div class="tts-form">
+                    <span class="form">{{ pair[0] }}</span>
+                    @if (pair[1]) { <span class="ipa">{{ pair[1] }}</span> }
+                    <button class="tts-btn" [class.speaking]="isSpeaking(pair[0]!)"
+                            (click)="speak(pair[0]!)">
+                      {{ isSpeaking(pair[0]!) ? '■' : '▶' }}
+                    </button>
+                  </div>
+                }
+              </div>
+              @if (v.exampleV2) {
+                <div class="card-example">
+                  <span>{{ v.exampleV2 }}</span>
+                  <button class="tts-btn inline" (click)="speak(v.exampleV2!)">▶</button>
+                </div>
+                @if (v.exampleTrans) {
+                  <div class="ex-uk">{{ v.exampleTrans }}</div>
+                }
+              }
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+  }
+}
