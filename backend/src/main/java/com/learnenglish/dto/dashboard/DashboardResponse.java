@@ -3,12 +3,10 @@ package com.learnenglish.dto.dashboard;
 import com.learnenglish.model.enums.CefrLevel;
 
 import java.util.List;
-import java.util.Map;
 
 public record DashboardResponse(
         UserStats userStats,
         List<LevelProgress> levelProgress,
-        List<TopicStatus> currentLevelTopics,
         List<SkillProgress> skillProgress,
         int reviewsDue
 ) {
@@ -26,7 +24,9 @@ public record DashboardResponse(
             String name,
             long totalLessons,
             long completedLessons,
-            int progressPercent
+            int progressPercent,
+            boolean unlocked,
+            List<TopicStatus> topics
     ) {}
 
     public record TopicStatus(

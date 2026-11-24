@@ -20,7 +20,6 @@ export interface RegisterRequest {
 export interface DashboardResponse {
   userStats: UserStats;
   levelProgress: LevelProgress[];
-  currentLevelTopics: TopicStatus[];
   skillProgress: SkillProgress[];
   reviewsDue: number;
 }
@@ -40,6 +39,8 @@ export interface LevelProgress {
   totalLessons: number;
   completedLessons: number;
   progressPercent: number;
+  unlocked: boolean;
+  topics: TopicStatus[];
 }
 
 export interface TopicStatus {

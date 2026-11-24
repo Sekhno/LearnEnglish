@@ -135,65 +135,131 @@
             <h2 class="section-title">Curriculum Progress</h2>
             <div class="levels-list">
               @for (lp of d.levelProgress; track lp.code) {
-                <div class="level-row" [class.active]="lp.code === d.userStats.currentLevel">
+                <div class="level-row"
+                     [class.active]="lp.code === activeLevel()"
+                     [class.locked]="!lp.unlocked"
+                     (click)="selectLevel(lp.code, lp.unlocked)"
+                     [style.cursor]="lp.unlocked ? 'pointer' : 'default'">
                   <div class="level-info">
-                    <span class="badge badge-{{lp.code.toLowerCase()}}">{{ lp.code }}</span>
+                    <span class="badge badge-{{lp.code.toLowerCase()}}">
+                      @if (!lp.unlocked) { 🔒 } @else { {{ lp.code }} }
+                    </span>
                     <div>
                       <div class="level-name">{{ lp.name }}</div>
-                      <div class="level-meta">{{ lp.completedLessons }}/{{ lp.totalLessons }} lessons</div>
+                      @if (lp.unlocked && lp.totalLessons > 0) {
+                        <div class="level-meta">{{ lp.completedLessons }}/{{ lp.totalLessons }} lessons</div>
+                      } @else if (!lp.unlocked) {
+                        <div class="level-meta level-locked-hint">Complete previous level to unlock</div>
+                      } @else {
+                        <div class="level-meta">Coming soon</div>
+                      }
                     </div>
                   </div>
-                  <div class="level-progress-wrap">
-                    <div class="progress-bar">
-                      <div class="fill" [style.width.%]="lp.progressPercent"
-                           [style.background]="'linear-gradient(90deg, ' + levelColor(lp.code) + ', ' + levelColor(lp.code) + '99)'"></div>
+                  @if (lp.unlocked && lp.totalLessons > 0) {
+                    <div class="level-progress-wrap">
+                      <div class="progress-bar">
+                        <div class="fill" [style.width.%]="lp.progressPercent"
+                             [style.background]="'linear-gradient(90deg, ' + levelColor(lp.code) + ', ' + levelColor(lp.code) + '99)'"></div>
+                      </div>
+                      <span class="level-pct">{{ lp.progressPercent }}%</span>
                     </div>
-                    <span class="level-pct">{{ lp.progressPercent }}%</span>
-                  </div>
+                  }
                 </div>
               }
             </div>
           </section>
         </div>
 
-        <!-- RIGHT COLUMN: A1 TOPICS -->
+        <!-- RIGHT COLUMN: Level Topics -->
         <div class="col-right">
           <section class="card section-card topics-section">
-            <div class="topics-header">
-              <h2 class="section-title">A1 Topics</h2>
-              <span class="badge badge-a1">20 lessons</span>
-            </div>
 
-            @if (d.currentLevelTopics.length === 0) {
-              <div class="empty-topics">
-                <p>No topics available yet.</p>
-              </div>
-            }
-
-            <div class="topics-grid">
-              @for (topic of d.currentLevelTopics; track topic.lessonId) {
+            <!-- Level Tabs -->
+            <div class="level-tabs">
+              @for (lp of d.levelProgress; track lp.code) {
                 <button
-                  class="topic-card"
-                  [class.completed]="topic.completed"
-                  [class.locked]="topic.locked"
-                  [class.available]="!topic.locked && !topic.completed"
-                  (click)="startLesson(topic)"
-                  [title]="topic.name"
+                  class="level-tab"
+                  [class.active]="activeLevel() === lp.code"
+                  [class.completed]="lp.progressPercent === 100"
+                  [class.locked-tab]="!lp.unlocked"
+                  [disabled]="!lp.unlocked"
+                  (click)="selectLevel(lp.code, lp.unlocked)"
+                  [style.--tab-color]="levelColor(lp.code)"
+                  [title]="lp.unlocked ? lp.name : 'Complete previous level to unlock'"
                 >
-                  <div class="topic-num">{{ topicIcon(topic) }}</div>
-                  <div class="topic-name">{{ topic.name }}</div>
-                  @if (topic.score !== null) {
-                    <div class="topic-score">{{ topic.score }}%</div>
+                  @if (!lp.unlocked) {
+                    <span class="tab-lock">🔒</span>
+                  } @else if (lp.progressPercent === 100) {
+                    <span class="tab-check">✓</span>
                   }
+                  {{ lp.code }}
                 </button>
               }
             </div>
 
-            <div class="topics-legend">
-              <span class="legend-item"><span class="dot done"></span>Completed</span>
-              <span class="legend-item"><span class="dot available"></span>Available</span>
-              <span class="legend-item"><span class="dot locked"></span>Locked</span>
-            </div>
+            <!-- Active Level Content -->
+            @if (currentLevelData(); as lp) {
+              <div class="topics-header">
+                <div>
+                  <h2 class="section-title">{{ lp.name }}</h2>
+                  @if (lp.unlocked && lp.totalLessons > 0) {
+                    <span class="level-progress-label">
+                      {{ lp.completedLessons }}/{{ lp.totalLessons }} lessons &nbsp;·&nbsp; {{ lp.progressPercent }}%
+                    </span>
+                  }
+                </div>
+                @if (lp.progressPercent === 100) {
+                  <span class="badge-complete">✓ Complete</span>
+                } @else {
+                  <span class="badge badge-{{lp.code.toLowerCase()}}">{{ lp.code }}</span>
+                }
+              </div>
+
+              @if (!lp.unlocked) {
+                <!-- Locked -->
+                <div class="level-placeholder">
+                  <div class="placeholder-icon">🔒</div>
+                  <p class="placeholder-title">Level Locked</p>
+                  <p class="placeholder-hint">Complete all lessons in the previous level to unlock {{ lp.name }}.</p>
+                </div>
+
+              } @else if (lp.totalLessons === 0) {
+                <!-- No content yet -->
+                <div class="level-placeholder">
+                  <div class="placeholder-icon">🚧</div>
+                  <p class="placeholder-title">Coming Soon</p>
+                  <p class="placeholder-hint">{{ lp.name }} content is being prepared. Check back later!</p>
+                </div>
+
+              } @else {
+                <!-- Topics Grid -->
+                <div class="topics-grid">
+                  @for (topic of currentTopics(); track topic.lessonId) {
+                    <button
+                      class="topic-card"
+                      [class.completed]="topic.completed"
+                      [class.locked]="topic.locked"
+                      [class.available]="!topic.locked && !topic.completed"
+                      (click)="startLesson(topic)"
+                      [title]="topic.name"
+                    >
+                      <div class="topic-num">{{ topicIcon(topic) }}</div>
+                      <div class="topic-name">{{ topic.name }}</div>
+                      @if (topic.score !== null) {
+                        <div class="topic-score">{{ topic.score }}%</div>
+                      }
+                    </button>
+                  }
+                </div>
+
+                <div class="topics-legend">
+                  <span class="legend-item"><span class="dot done"></span>Completed</span>
+                  <span class="legend-item"><span class="dot available"></span>Available</span>
+                  <span class="legend-item"><span class="dot locked"></span>Locked</span>
+                </div>
+              }
+            }
+
           </section>
         </div>
       </div>

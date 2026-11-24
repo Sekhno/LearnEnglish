@@ -242,7 +242,8 @@
   transition: var(--transition);
 
   &.active { border-color: var(--primary); background: var(--primary-light); }
-  &:not(.active):hover { border-color: var(--text-muted); }
+  &:not(.active):not(.locked):hover { border-color: var(--text-muted); background: var(--bg-hover, rgba(0,0,0,.03)); }
+  &.locked { opacity: .55; }
 
   .level-info {
     display: flex;
@@ -253,6 +254,7 @@
 
   .level-name { font-weight: 600; font-size: 14px; }
   .level-meta { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+  .level-locked-hint { color: var(--text-muted); font-style: italic; }
 
   .level-progress-wrap {
     display: flex;
@@ -261,6 +263,55 @@
 
     .progress-bar { flex: 1; }
     .level-pct { font-size: 12px; font-weight: 600; color: var(--text-secondary); min-width: 32px; text-align: right; }
+  }
+}
+
+/* ===== LEVEL TABS ===== */
+.level-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.level-tab {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 16px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: .3px;
+  border: 2px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: var(--transition);
+
+  .tab-lock { font-size: 12px; opacity: .7; }
+  .tab-check { font-size: 12px; color: var(--success); }
+
+  &:hover:not(:disabled) {
+    border-color: var(--tab-color, var(--primary));
+    color: var(--tab-color, var(--primary));
+    background: color-mix(in srgb, var(--tab-color, var(--primary)) 8%, transparent);
+  }
+
+  &.active {
+    border-color: var(--tab-color, var(--primary));
+    background: color-mix(in srgb, var(--tab-color, var(--primary)) 12%, transparent);
+    color: var(--tab-color, var(--primary));
+  }
+
+  &.completed:not(.active) {
+    border-color: var(--success);
+    color: var(--success);
+  }
+
+  &.locked-tab {
+    opacity: .45;
+    cursor: not-allowed;
   }
 }
 
@@ -274,6 +325,57 @@
   margin-bottom: 20px;
 
   .section-title { margin-bottom: 0; }
+}
+
+.level-progress-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 3px;
+  display: block;
+}
+
+.badge-complete {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  background: var(--success-light);
+  color: var(--success);
+  border: 1px solid var(--success);
+  white-space: nowrap;
+}
+
+/* ===== LEVEL PLACEHOLDER ===== */
+.level-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 56px 24px;
+  text-align: center;
+
+  .placeholder-icon {
+    font-size: 40px;
+    line-height: 1;
+    opacity: .7;
+  }
+
+  .placeholder-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+
+  .placeholder-hint {
+    font-size: 13px;
+    color: var(--text-secondary);
+    max-width: 280px;
+    line-height: 1.5;
+  }
 }
 
 .empty-topics {
