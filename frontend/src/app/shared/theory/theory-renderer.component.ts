@@ -19,11 +19,11 @@ import { TheoryBlock, ParsedBlock } from '../../core/models';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TheoryRendererComponent {
-  blocks = input.required<TheoryBlock[]>();
+  readonly blocks = input.required<TheoryBlock[]>();
 
   private parser = inject(MarkdownParserService);
 
-  allParsed = computed<ParsedBlock[]>(() =>
+  protected allParsed = computed<ParsedBlock[]>(() =>
     this.blocks().flatMap(b => this.parseBlock(b.content))
   );
 
