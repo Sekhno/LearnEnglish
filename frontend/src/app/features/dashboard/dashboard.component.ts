@@ -46,7 +46,10 @@ export class DashboardComponent implements OnInit {
     this.dashService.getDashboard().subscribe({
       next: (data) => {
         this.dashboard.set(data);
-        this.activeLevel.set(data.userStats.currentLevel);
+        // Восстанавливаем последний выбранный уровень в сессии,
+        // иначе берём текущий уровень обучения с бекенда
+        const saved = this.dashService.selectedLevel();
+        this.activeLevel.set(saved ?? data.userStats.currentLevel);
         this.loading.set(false);
       },
       error: () => { this.error.set('Failed to load dashboard.'); this.loading.set(false); }
@@ -54,7 +57,10 @@ export class DashboardComponent implements OnInit {
   }
 
   selectLevel(code: string, unlocked: boolean): void {
-    if (unlocked) this.activeLevel.set(code);
+    if (unlocked) {
+      this.activeLevel.set(code);
+      this.dashService.selectedLevel.set(code);
+    }
   }
 
   startLesson(topic: TopicStatus): void {
