@@ -45,6 +45,17 @@ export class MarkdownParserService {
         continue;
       }
 
+      // Ordered list
+      if (/^\d+\.\s/.test(trimmed)) {
+        const items: InlineToken[][] = [];
+        while (i < lines.length && /^\d+\.\s/.test(lines[i].trim())) {
+          items.push(this.parseInline(lines[i].trim().replace(/^\d+\.\s/, '')));
+          i++;
+        }
+        blocks.push({ kind: 'ordered-list', items });
+        continue;
+      }
+
       // Paragraph — accumulate consecutive non-empty, non-special lines
       const paraLines: string[] = [];
       while (
@@ -52,7 +63,8 @@ export class MarkdownParserService {
         lines[i].trim() &&
         !lines[i].trim().startsWith('#') &&
         !lines[i].trim().startsWith('|') &&
-        !/^[-*]\s/.test(lines[i].trim())
+        !/^[-*]\s/.test(lines[i].trim()) &&
+        !/^\d+\.\s/.test(lines[i].trim())
       ) {
         paraLines.push(lines[i].trim());
         i++;

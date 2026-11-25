@@ -199,6 +199,7 @@ export type BlockKind =
   | 'heading'
   | 'paragraph'
   | 'list'
+  | 'ordered-list'
   | 'table'
   | 'rule'
   | 'example'
